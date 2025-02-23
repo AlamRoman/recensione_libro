@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 23, 2025 at 04:19 PM
+-- Generation Time: Feb 23, 2025 at 09:01 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -37,6 +37,21 @@ CREATE TABLE `libro` (
   `anno_pubblicazione` year(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `libro`
+--
+
+INSERT INTO `libro` (`id`, `titolo`, `autore`, `descrizione`, `isbn`, `genere`, `anno_pubblicazione`) VALUES
+(1, 'Il nome della rosa', 'Umberto Eco', 'Romanzo storico e giallo ambientato in un monastero medievale.', '9788804663545', 'Romanzo storico', '1980'),
+(2, 'La coscienza di Zeno', 'Italo Svevo', 'Romanzo psicologico che esplora le contraddizioni della mente umana.', '9788807888123', 'Romanzo psicologico', '1923'),
+(3, 'Il Gattopardo', 'Giuseppe Tomasi di Lampedusa', 'Racconto della decadenza di una famiglia aristocratica siciliana.', '9788807888124', 'Romanzo storico', '1958'),
+(4, 'Se questo è un uomo', 'Primo Levi', 'Testimonianza dell’esperienza dell’autore nei campi di concentramento.', '9788806211491', 'Memorie', '1947'),
+(5, 'Il barone rampante', 'Italo Calvino', 'La storia di un giovane nobile che decide di vivere sugli alberi.', '9788807888125', 'Romanzo fantastico', '1957'),
+(6, '1984', 'George Orwell', 'Romanzo distopico che descrive un futuro totalitario e sorvegliato.', '9780451524935', 'Distopia', '1949'),
+(7, 'To Kill a Mockingbird', 'Harper Lee', 'Romanzo ambientato nel profondo Sud degli Stati Uniti, che affronta temi di giustizia e pregiudizio.', '9780060935467', 'Narrativa', '1960'),
+(8, 'Pride and Prejudice', 'Jane Austen', 'Classico della letteratura inglese che esplora le dinamiche sociali e le relazioni sentimentali.', '9780141439518', 'Romanzo', '0000'),
+(9, 'The Great Gatsby', 'F. Scott Fitzgerald', 'Ritratto della società americana degli anni Venti, tra sfarzo e delusione.', '9780743273565', 'Romanzo', '1925');
+
 -- --------------------------------------------------------
 
 --
@@ -63,8 +78,16 @@ CREATE TABLE `users` (
   `nome` varchar(50) DEFAULT NULL,
   `cognome` varchar(50) DEFAULT NULL,
   `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL
+  `password` varchar(255) NOT NULL,
+  `token` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `nome`, `cognome`, `username`, `password`, `token`) VALUES
+(1, 'Mario', 'Rossi', 'mario', '$2y$10$qjmd5gOWhllP3aznOrabBOvY0OWGgFQIKk3oPqMvdkcwLy.AT20IS', 'e2ed49857e2074ce8ad9f1074684db20558aeef7b2870bf6cb0a32ebfeb81884');
 
 --
 -- Indexes for dumped tables
@@ -100,7 +123,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `libro`
 --
 ALTER TABLE `libro`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `recensione`
@@ -112,7 +135,7 @@ ALTER TABLE `recensione`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
