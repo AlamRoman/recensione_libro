@@ -75,7 +75,12 @@
             
                 if (password_verify($password, $user["password"])) {
 
-                    $token = base64_encode($username . ':' . time());
+                    $token = hash('sha256', $username . ':' . time());
+
+                    $sql = "UPDATE users SET token = ? WHERE username = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("ss", $token, $username);
+                    $stmt->execute();
 
                     $responseData = [
                         "status"  => "success",
