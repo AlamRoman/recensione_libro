@@ -7,10 +7,6 @@
 
     $conn = new mysqli( $hostname, $username, $password, $database);
 
-    header('Content-Type: application/xml');
-
-    $status_code = "";
-
     function ws_operation($uri){
         $uri_arr = parse_url($uri);
         $path = explode("/", $uri_arr['path']);
@@ -35,6 +31,8 @@
     $METHOD = $_SERVER['REQUEST_METHOD'];
     $OPERATION = ws_operation($_SERVER['REQUEST_URI']);
 
+    $responseData = [];
+    $status_code = 405;
 
     if ($METHOD == "GET") { //read
         # code...
@@ -47,13 +45,10 @@
             $username = null;
             $password = null;
 
-            $responseData = [];
-            $responseType = "";
-
-            if ($contentType === "application/xml") {// xml data
+            if ($CONTENT_TYPE === "application/xml") {// xml data
 
                 libxml_use_internal_errors(true);
-                $xml = simplexml_load_string($rawInput);
+                $xml = simplexml_load_string($input);
 
                 if (!$xml) {
                     http_response_code(400); // bad request
@@ -64,9 +59,8 @@
 
                 $username = (string)$xml->username;
                 $password = (string)$xml->password;
-                $responseType = "xml";
                 
-            }else if($contentType === "application/json"){ //json data
+            }else if($CONTENT_TYPE === "application/json"){ //json data
                 // TODO
             }
 
@@ -108,6 +102,12 @@
 
         }else{// not found
             $statuscode = 404;
+
+            $responseData = [
+                "status"  => "error",
+                "message" => "Operazion not found",
+                "token"   => $token
+            ];
         }
 
     }else if ($METHOD == "PUT") { //update
@@ -116,18 +116,25 @@
         # code...
     }else {
         $status_code = 405; //method not allowed
+
+        $responseData = [
+            "status"  => "error",
+            "message" => "Method not allowed",
+            "token"   => $token
+        ];
     }
 
+    //set response code
     http_response_code($status_code);
 
-    if ($responseType == "xml") {
-        header("Content-Type: application/xml");
-        $xmlResponse = new SimpleXMLElement('<response/>');
-        array_to_xml($responseData, $xmlResponse);
-        echo $xmlResponse->asXML();
+    if ($CONTENT_TYPE === "application/xml") {
+        header("Content-Type: application/xml"); //set content type
+        $xmlResponse = new SimpleXMLElement('<response/>'); //create response xml
+        array_to_xml($responseData, $xmlResponse); //convert data to xml
+        echo $xmlResponse->asXML(); //print the response
     } else {
-        header("Content-Type: application/json");
-        echo json_encode($responseData);
+        header("Content-Type: application/json"); //set content type
+        echo json_encode($responseData); // encode and print the response
     }
 
 ?>
