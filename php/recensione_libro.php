@@ -27,15 +27,66 @@
         }
     }
 
+    function validate_token($token){
+        global $conn;
+
+        $sql = "SELECT * FROM users WHERE token = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     $CONTENT_TYPE = $_SERVER["CONTENT_TYPE"] ?? "application/xml"; // default content type xml
     $METHOD = $_SERVER['REQUEST_METHOD'];
     $OPERATION = ws_operation($_SERVER['REQUEST_URI']);
+
+    $headers = getallheaders();
+    $token = $headers["Auth-Token"] ?? null;
 
     $responseData = [];
     $status_code = 405;
 
     if ($METHOD == "GET") { //read
-        # code...
+        
+        if ($OPERATION == "list_books") {// list all books
+            
+            if ($token !== null && validate_token($token)) {
+                
+                $sql = "SELECT * FROM libro";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                while($book = $result->fetch_assoc()){
+                    $responseData[] = $book;
+                }
+
+                $status_code = 200; //OK
+
+            }else{
+                $responseData = [
+                    "status"  => "error",
+                    "message" => "Unauthorized"
+                ];
+                $status_code = 401; // unauthorized
+            }
+
+        }else{
+            $statuscode = 404; //operation not found
+
+            $responseData = [
+                "status"  => "error",
+                "message" => "Operation not found"
+            ];
+        }
+
     }else if ($METHOD == "POST") { //create
 
         if ($OPERATION == "login") {
@@ -110,8 +161,7 @@
 
             $responseData = [
                 "status"  => "error",
-                "message" => "Operazion not found",
-                "token"   => $token
+                "message" => "Operation not found"
             ];
         }
 
