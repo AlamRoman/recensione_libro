@@ -125,6 +125,42 @@
                 ];
                 $status_code = 401; // unauthorized
             }
+
+        } else if ($OPERATION == "validate_token"){
+
+            if (isset($_GET["token"])) {
+
+                $token = $_GET["token"];
+
+                if (validate_token($token)) {
+
+                    $status_code = 200; // OK
+
+                    $responseData = [
+                        "status"  => "success",
+                        "message" => "Token valido"
+                    ];
+
+                }else{
+
+                    $status_code = 200; // OK
+
+                    $responseData = [
+                        "status"  => "error",
+                        "message" => "Token non valido"
+                    ];
+                }
+
+            }else{
+
+                $status_code = 400; // bad request
+
+                $responseData = [
+                    "status"  => "error",
+                    "message" => "Token non presente nella richiesta"
+                ];
+            }
+
         } else {
             $status_code = 404; //operation not found
 
@@ -551,6 +587,7 @@
                             "message" => "Recensione eliminata con successo"
                         ];
                         $status_code = 200; //OK
+                        
                     } catch (mysqli_sql_exception $e) {
                         $responseData = [
                             "status"  => "error",
