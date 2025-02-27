@@ -13,6 +13,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 
 import app.errors.WsException;
 import app.model.xml.ListaLibri;
+import app.model.xml.Recensioni;
 
 public class WsClient {
 	private String baseUrl;
@@ -28,13 +29,20 @@ public class WsClient {
 	public String pubblicaRecensione(String tipoDato,String authToken, int idLibro, Float voto, String commento) throws Exception { //Funzione che invia una richiesta in POST per scrivere una recensione
 		URI uri = new URI(this.baseUrl + "/create_recensione");
 		
-		String recensioneXml = "<recensione>"
-				+ "<id_libro>"+idLibro+"</id_libro>"
-				+ "<voto>"+voto+"</voto>"
-				+ "<commento>"+commento+"</commento>"
-				+ "</recensione>";
+		String richiesta = "";
 		
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(recensioneXml)).header("Accept", tipoDato).header("Auth-Token", authToken).build();
+		if (tipoDato.equals("application/xml")) {
+			richiesta = "<recensione>"
+					+ "<id_libro>"+idLibro+"</id_libro>"
+					+ "<voto>"+voto+"</voto>"
+					+ "<commento>"+commento+"</commento>"
+					+ "</recensione>";
+		}else if (tipoDato.equals("application/json")) {
+			richiesta = "{\"id_libro\":"+idLibro+",\"voto\":"+voto+",\"commento\":\""+commento+"\"}";
+		}
+		
+		
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(richiesta)).header("Accept", tipoDato).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 		
 		if (res.statusCode() != 200)
@@ -46,23 +54,23 @@ public class WsClient {
 	}
 	
 	public String updateRecensione(String tipoDato, String authToken, int idRecensione, Float voto, String commento) throws Exception { //Funzione che invia una richiesta in PUT per modificare una recensione
-		URI uri = new URI(this.baseUrl + "/update_review");
+		URI uri = new URI(this.baseUrl + "/update_recensione");
 		
-		String elementoVoto="";
-		
-		if (voto == null) {
-			elementoVoto = "<voto></voto>";
-		}else {
-			elementoVoto = "<voto>"+voto+"</voto>";
+		String richiesta = "";
+
+		if (tipoDato == "application/xml") {
+			String elementoVoto = (voto == null) ? "<voto></voto>" : "<voto>"+voto+"</voto>";
+			richiesta = "<recensione>"
+					+ "<id_recensione>"+idRecensione+"</id_recensione>"
+					+ elementoVoto
+					+ "<commento>"+commento+"</commento>"
+					+ "</recensione>";
+		}else if (tipoDato == "application/json") {
+			String elementoVoto = (voto == null) ? "null" : voto.toString();
+			richiesta = "{\"id_recensione\":"+idRecensione+",\"voto\":"+elementoVoto+",\"commento\":\""+commento+"\"}";
 		}
 		
-		String recensioneXml = "<recensione>"
-				+ "<id_recensione>"+idRecensione+"</id_recensione>"
-				+ elementoVoto
-				+ "<commento>"+commento+"</commento>"
-				+ "</recensione>";
-		
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).PUT(HttpRequest.BodyPublishers.ofString(recensioneXml)).header("Accept", tipoDato).header("Auth-Token", authToken).build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).PUT(HttpRequest.BodyPublishers.ofString(richiesta)).header("Accept", tipoDato).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 		
 		if (res.statusCode() != 200)
@@ -74,13 +82,9 @@ public class WsClient {
 	}
 	
 	public String deleteRecensione(String tipoDato, String authToken, int idRecensione) throws Exception {
-		URI uri = new URI(this.baseUrl + "/delete_review");
+		URI uri = new URI(this.baseUrl + "/delete_recensione?id_recensione="+idRecensione+"");
 		
-		String recensioneXml = "<recensione>"
-				+ "<id_recensione>"+idRecensione+"</id_recensione>"
-				+ "</recensione>";
-		
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).method("DELETE", HttpRequest.BodyPublishers.ofString(recensioneXml)).header("Accept", tipoDato).header("Auth-Token", authToken).build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).DELETE().header("Accept", tipoDato).header("Auth-Token", authToken).build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 		
 		if (res.statusCode() != 200)
@@ -91,7 +95,7 @@ public class WsClient {
 		return body;
 	}
 	
-	public String getRecensioni(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
+	public Recensioni getRecensioni(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
 		URI uri = new URI(this.baseUrl + "/list_user_reviews");
 		HttpRequest req = HttpRequest.newBuilder().uri(uri).header("Accept", tipoDato).header("Auth-Token", authToken).GET().build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
@@ -99,12 +103,12 @@ public class WsClient {
 		if (res.statusCode() != 200)
 			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
 
-		String body = (String) res.body();
+		Recensioni recensioni = XmlUtils.unmarshal(Recensioni.class, res.body());
 
-		return body;
+		return recensioni;
 	}
 	
-	public String getListaLibri(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
+	public ListaLibri getListaLibri(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
 		URI uri = new URI(this.baseUrl + "/list_books");
 		HttpRequest req = HttpRequest.newBuilder().uri(uri).header("Accept", tipoDato).header("Auth-Token", authToken).GET().build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
@@ -112,9 +116,9 @@ public class WsClient {
 		if (res.statusCode() != 200)
 			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
 
-		String body = (String) res.body();
-
-		return body;
+		ListaLibri lista = XmlUtils.unmarshal(ListaLibri.class, res.body());
+		
+		return lista;
 	}
 	
 }
