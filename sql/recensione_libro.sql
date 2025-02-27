@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 23, 2025 at 09:01 PM
+-- Generation Time: Feb 27, 2025 at 05:32 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -62,10 +62,18 @@ CREATE TABLE `recensione` (
   `id` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
   `id_libro` int(11) NOT NULL,
-  `voto` decimal(2,1) NOT NULL,
+  `voto` decimal(3,1) NOT NULL,
   `commento` varchar(255) DEFAULT NULL,
-  `data_recensione` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `data_ultima_modifica` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `recensione`
+--
+
+INSERT INTO `recensione` (`id`, `id_user`, `id_libro`, `voto`, `commento`, `data_ultima_modifica`) VALUES
+(3, 1, 2, 10.0, 'libro bellissimo', '2025-02-27 10:50:44'),
+(5, 1, 3, 8.0, 'troppo deppresso', '2025-02-26 08:34:06');
 
 -- --------------------------------------------------------
 
@@ -78,7 +86,6 @@ CREATE TABLE `users` (
   `nome` varchar(50) DEFAULT NULL,
   `cognome` varchar(50) DEFAULT NULL,
   `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
   `token` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -86,8 +93,10 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `nome`, `cognome`, `username`, `password`, `token`) VALUES
-(1, 'Mario', 'Rossi', 'mario', '$2y$10$qjmd5gOWhllP3aznOrabBOvY0OWGgFQIKk3oPqMvdkcwLy.AT20IS', 'e2ed49857e2074ce8ad9f1074684db20558aeef7b2870bf6cb0a32ebfeb81884');
+INSERT INTO `users` (`id`, `nome`, `cognome`, `username`, `token`) VALUES
+(1, 'Mario', 'Rossi', 'mario', '7123a062ef08af773b5cff8ed91081d1dcc1d75c23cf99fbf72cacc8bb0aef12'),
+(2, 'luigi', 'rossi', 'luigi', 'fb22eba6ee525515540432746b71fd1e8084488f2d56abd40f16c1c5e8a65a13'),
+(3, 'ciao', 'rossi', 'luigi7', '05ed52b00aa32a15f5a2423ab91193cc930ccb8cfd69128a0d471bf9a4021586');
 
 --
 -- Indexes for dumped tables
@@ -129,13 +138,13 @@ ALTER TABLE `libro`
 -- AUTO_INCREMENT for table `recensione`
 --
 ALTER TABLE `recensione`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
