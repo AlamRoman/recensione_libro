@@ -66,7 +66,7 @@
     $OPERATION = ws_operation($_SERVER['REQUEST_URI']);
 
     $headers = getallheaders();
-    $token = $headers["Auth-Token"] ?? null; //get the auth token frim the header
+    $token = $headers["Auth-Token"] ?? null; //get the auth token from the header
 
     $responseData = [];
     $status_code = 405;
@@ -136,12 +136,13 @@
 
     }else if ($METHOD == "POST") { //create
 
-        if ($OPERATION == "login") {
+        if ($OPERATION == "register") {
             
             $input = file_get_contents("php://input");
 
             $username = null;
-            $password = null;
+            $nome = null;
+            $cognome = null;
 
             if ($CONTENT_TYPE === "application/xml") {// xml data
 
@@ -156,9 +157,10 @@
                 }
 
                 $username = (string)$xml->username;
-                $password = (string)$xml->password;
+                $nome = (string)$xml->nome;
+                $cognome = (string)$xml->cognome;
 
-                if(empty($username) || empty($password)){
+                if(empty($username) || empty($nome) || empty($cognome)){
                     http_response_code(400); // bad request
                     header("Content-Type: application/xml");
                     echo "<response><status>error</status><message>I parametri della richiesta sono vuoti</message></response>";
@@ -176,21 +178,23 @@
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
 
-            if ($user !== null) {
-            
-                if (password_verify($password, $user["password"])) {
+            if ($user == null) {
 
-                    //create auth token by hashing username and current time
-                    $token = hash('sha256', $username . ':' . time());
+                //crea il token usando hash
+                $token = hash('sha256', $username . ':' . time());
 
-                    $sql = "UPDATE users SET token = ? WHERE username = ?";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("ss", $token, $username);
-                    $stmt->execute();
+                $sql = "INSERT INTO users(username, nome, cognome, token) VALUES(?, ?, ?, ?)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("ssss",  $username, $nome, $cognome, $token);
+                
+                if ($stmt->execute()) {
 
                     $responseData = [
                         "status"  => "success",
-                        "message" => "Login successful",
+                        "message" => "Registrazione completata con successo",
+                        "username" => $username,
+                        "nome" => $nome,
+                        "cognome" => $cognome,
                         "token"   => $token
                     ];
                     $status_code = 200; //OK
@@ -198,17 +202,18 @@
                 }else{
                     $responseData = [
                         "status"  => "error",
-                        "message" => "username o password errate"
+                        "message" => "Errore durante la registrazione dell'utente"
                     ];
-                    $status_code = 401; // unauthorized
+                    $status_code = 500; // internal server error
                 }
 
-            }else{
+            }else{ // username non disponibile
+
                 $responseData = [
                     "status"  => "error",
-                    "message" => "username non trovato"
+                    "message" => "username non disponibile"
                 ];
-                $status_code = 401; // unauthorized
+                $status_code = 409; // conflict
             }
 
         } else if ($OPERATION == "create_recensione") {
