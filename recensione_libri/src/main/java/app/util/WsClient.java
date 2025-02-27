@@ -15,6 +15,8 @@ import app.errors.WsException;
 import app.model.xml.ListaLibri;
 import app.model.xml.Recensioni;
 
+import com.google.gson.Gson;
+
 public class WsClient {
 	private String baseUrl;
 	private HttpClient client;
@@ -103,9 +105,12 @@ public class WsClient {
 		if (res.statusCode() != 200)
 			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
 
-		Recensioni recensioni = XmlUtils.unmarshal(Recensioni.class, res.body());
-
-		return recensioni;
+		if (tipoDato.equals("application/json")) {
+	        Gson gson = new Gson();
+	        return gson.fromJson(res.body(), Recensioni.class);
+	    } else {
+	        return XmlUtils.unmarshal(Recensioni.class, res.body());
+	    }
 	}
 	
 	public ListaLibri getListaLibri(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
@@ -118,7 +123,12 @@ public class WsClient {
 
 		ListaLibri lista = XmlUtils.unmarshal(ListaLibri.class, res.body());
 		
-		return lista;
+		if (tipoDato.equals("application/json")) {
+			Gson gson = new Gson();
+		    return gson.fromJson(res.body(), ListaLibri.class);
+	    } else {
+	        return XmlUtils.unmarshal(ListaLibri.class, res.body());
+	    }
 	}
 	
 }

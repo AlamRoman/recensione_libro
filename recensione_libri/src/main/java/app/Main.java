@@ -155,4 +155,34 @@ public class Main
 			System.out.println(e.getMessage());
 		}
 	}
+	
+	private void registra(Scanner scanner) {
+
+		System.out.println("\nRegistra:\n");
+		
+		String username, nome, cognome;
+		
+		System.out.print("Inserisci l'username : ");
+		username = scanner.next();
+		
+		System.out.print("Inserisci il nome : ");
+		nome = scanner.next();
+		
+		System.out.print("Inserisci il cognome : ");
+		cognome = scanner.next();
+		
+		//ws client request
+	}
+	
+	private boolean login(Scanner scanner) {
+		
+		System.out.println("\nFai login usando il tuo token:\n");
+		
+		String token;
+		
+		System.out.print("Inserisci il tuo token : ");
+		token = scanner.next();
+		
+		//ws client request
+	}
 }
