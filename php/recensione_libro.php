@@ -43,6 +43,24 @@
         return false;
     }
 
+    function get_user_id_by_token($token){
+        global $conn;
+
+        $sql = "SELECT * FROM users WHERE token = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows >= 0){
+            $user = $result->fetch_assoc();
+
+            return $user["id"];
+        }
+
+        return -1;
+    }
+
     $CONTENT_TYPE = $_SERVER["CONTENT_TYPE"] ?? "application/xml"; // default content type xml
     $METHOD = $_SERVER['REQUEST_METHOD'];
     $OPERATION = ws_operation($_SERVER['REQUEST_URI']);
@@ -58,8 +76,8 @@
         if ($OPERATION == "list_books") {// list all books
             
             if ($token !== null && validate_token($token)) {
-                
-                //get all books from the database
+
+                //get all reviews of an user
                 $sql = "SELECT * FROM libro";
                 $stmt = $conn->prepare($sql);
                 $stmt->execute();
@@ -80,7 +98,34 @@
                 $status_code = 401; // unauthorized
             }
 
-        }else{
+        } else if ($OPERATION == "list_user_reviews"){
+
+            if ($token !== null && validate_token($token)){
+
+                //get user id
+                $id_user = get_user_id_by_token($token);
+                
+                //get all reviews of an user
+                $sql = "SELECT r.* FROM recensione r JOIN users u ON r.id_user = u.id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                //put all the reviews in the response
+                while($book = $result->fetch_assoc()){
+                    $responseData[] = $book;
+                }
+
+                $status_code = 200; //OK
+
+            } else{
+                $responseData = [
+                    "status"  => "error",
+                    "message" => "Unauthorized"
+                ];
+                $status_code = 401; // unauthorized
+            }
+        } else {
             $status_code = 404; //operation not found
 
             $responseData = [
@@ -159,7 +204,7 @@
                 $status_code = 401; // unauthorized
             }
 
-        }else if ($OPERATION == "create_recensione") {
+        } else if ($OPERATION == "create_recensione") {
 
             if ($token !== null && validate_token($token)) {
 
@@ -172,14 +217,7 @@
                 $data_ultima_modifica = "";
 
                 //prendi l'id del user con il suo token
-                $sql = "SELECT * FROM users WHERE token = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("s", $token);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $user = $result->fetch_assoc();
-
-                $id_user = $user["id"];
+                $id_user = get_user_id_by_token($token);
 
                 $data_ultima_modifica = date('Y-m-d H:i:s');
 
@@ -250,7 +288,7 @@
                 $status_code = 401; // unauthorized
             }
 
-        }else {// not found
+        } else {// not found
             $status_code = 404;
 
             $responseData = [
@@ -262,7 +300,7 @@
     }else if ($METHOD == "PUT") { //update
         # code...
     }else if ($METHOD == "DELETE") { //delete
-        # code...
+
     }else {
         $status_code = 405; //method not allowed
 
