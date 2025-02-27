@@ -168,7 +168,25 @@
                 }
                 
             }else if($CONTENT_TYPE === "application/json"){ //json data
-                // TODO
+                
+                $data = json_decode($input, true);
+
+                if ($data === null) {
+                    http_response_code(400); //bad request
+                    echo json_encode(["status" => "error", "message" => "Invalid JSON format"]);
+                    exit;
+                }
+
+                $username = $data["username"];
+                $nome = $data["nome"];
+                $cognome = $data["cognome"];
+
+                if(empty($username) || empty($nome) || empty($cognome)){
+
+                    http_response_code(400); // bad request
+                    echo json_encode(["status" => "error", "message" => "Invalid JSON format"]);
+                    exit;
+                }
             }
 
             $sql = "SELECT * FROM users WHERE username = ?";
@@ -258,9 +276,28 @@
                     }
                 
                 }else if($CONTENT_TYPE === "application/json"){ //json data
-                    // TODO
+
+                    $data = json_decode($input, true);
+
+                    if ($data === null) {
+                        http_response_code(400); //bad request
+                        echo json_encode(["status" => "error", "message" => "Invalid JSON format"]);
+                        exit;
+                    }
+
+                    $id_libro = $data["id_libro"];
+                    $voto = $data["voto"];
+                    $commento = $data["commento"];
+
+                    if(empty($id_libro) || empty($voto) || empty($commento)){
+                        
+                        http_response_code(400); // bad request
+                        echo json_encode(["status" => "error", "message" => "I parametri della richiesta sono vuoti"]);
+                        exit;
+                    }
                 }
 
+                // controlla se ci sono recensioni da questo utente per questo libro
                 $sql = "SELECT * FROM recensione WHERE id_user = ? AND id_libro = ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("ii", $id_user, $id_libro);
@@ -319,7 +356,7 @@
 
     }else if ($METHOD == "PUT") { //update
 
-        if($OPERATION == "update_review"){
+        if($OPERATION == "update_recensione"){
 
             if ($token !== null && validate_token($token)){
 
@@ -359,9 +396,28 @@
                     }
                     
                 }else if($CONTENT_TYPE === "application/json"){ //json data
-                    // TODO
+
+                    $data = json_decode($input, true);
+
+                    if ($data === null) {
+                        http_response_code(400); //bad request
+                        echo json_encode(["status" => "error", "message" => "Invalid JSON format"]);
+                        exit;
+                    }
+
+                    $id_recensione = $data["id_recensione"];
+                    $voto = $data["voto"] ?? null;
+                    $commento = $data["commento"] ?? null;
+
+                    if(empty($id_recensione)){
+                        
+                        http_response_code(400); // bad request
+                        echo json_encode(["status" => "error", "message" => "I parametri della richiesta sono vuoti"]);
+                        exit;
+                    }
                 }
 
+                //controlla se la recensione fatta dall'utente esiste
                 $sql = "SELECT * FROM recensione WHERE id = ? AND id_user = ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("ii", $id_recensione, $id_user);
@@ -469,39 +525,11 @@
         
     }else if ($METHOD == "DELETE") { //delete
 
-        if($OPERATION == "delete_review"){
+        if($OPERATION == "delete_recensione"){
 
             if ($token !== null && validate_token($token)){
 
-                $input = file_get_contents("php://input");
-
-                $id_recensione = "";
-
-                if ($CONTENT_TYPE === "application/xml"){ //xml
-
-                    libxml_use_internal_errors(true);
-                    $xml = simplexml_load_string($input);
-
-                    if (!$xml) {
-                        http_response_code(400); // bad request
-                        header("Content-Type: application/xml");
-                        echo "<response><status>error</status><message>Invalid XML format</message></response>";
-                        exit;
-                    }
-
-                    $id_recensione = (int) $xml->id_recensione;
-
-                    if (empty($id_recensione)) {
-
-                        http_response_code(400); // bad request
-                        header("Content-Type: application/xml");
-                        echo "<response><status>error</status><message>I parametri della richiesta sono vuoti</message></response>";
-                        exit;
-                    }
-
-                } else if($CONTENT_TYPE === "application/json"){ //json data
-                    // TODO
-                }
+                $id_recensione = $_GET["id_recensione"];
 
                 $sql = "SELECT * FROM recensione WHERE id = ?";
                 $stmt = $conn->prepare($sql);
