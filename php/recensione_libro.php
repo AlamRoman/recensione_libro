@@ -233,7 +233,7 @@
                         exit;
                     }
 
-                    $id_libro = (string) $xml->id_libro;
+                    $id_libro = (int) $xml->id_libro;
                     $voto = (string) $xml->voto;
                     $commento = (string) $xml->commento;
                 
@@ -300,6 +300,86 @@
     }else if ($METHOD == "PUT") { //update
         # code...
     }else if ($METHOD == "DELETE") { //delete
+
+        if($OPERATION == "delete_review"){
+
+            if ($token !== null && validate_token($token)){
+
+                $input = file_get_contents("php://input");
+
+                $id_recensione = "";
+
+                if ($CONTENT_TYPE === "application/xml"){ //xml
+
+                    libxml_use_internal_errors(true);
+                    $xml = simplexml_load_string($input);
+
+                    if (!$xml) {
+                        http_response_code(400); // bad request
+                        header("Content-Type: application/xml");
+                        echo "<response><status>error</status><message>Invalid XML format</message></response>";
+                        exit;
+                    }
+
+                    $id_recensione = (int) $xml->id_recensione;
+
+                } else if($CONTENT_TYPE === "application/json"){ //json data
+                    // TODO
+                }
+
+                $sql = "SELECT * FROM recensione WHERE id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $id_recensione);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows > 0) {
+
+                    $sql = "DELETE FROM recensione WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $id_recensione);
+
+                    if ($stmt->execute()) {
+
+                        $responseData = [
+                            "status"  => "success",
+                            "message" => "Recensione eliminata con successo"
+                        ];
+                        $status_code = 200; //OK
+                        
+                    }else{
+
+                        $responseData = [
+                            "status"  => "error",
+                            "message" => "Errore durante l'eliminazione della recensione"
+                        ];
+                        $status_code = 500; // internal server error
+                    }
+
+                }else{
+                    $responseData = [
+                        "status"  => "error",
+                        "message" => "Recensione inesistente"
+                    ];
+                    $status_code = 400; // internal server error
+                }
+
+            } else{
+                $responseData = [
+                    "status"  => "error",
+                    "message" => "Unauthorized"
+                ];
+                $status_code = 401; // unauthorized
+            }
+
+        } else {// not found
+            $status_code = 404;
+
+            $responseData = [
+                "status"  => "error",
+                "message" => "Operation not found"
+            ];
+        }
 
     }else {
         $status_code = 405; //method not allowed
