@@ -8,8 +8,6 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-//Classe inutilizzata
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = { "libri" }) 
 @XmlRootElement(name = "Libri") 
@@ -22,15 +20,10 @@ public class ListaLibri {
         this.libri = new ArrayList<>();
     }
 
-    public List<Libro> getLibri() {
-        return libri;
+    public void stampaLibri() {
+        for (Libro libro : libri) {
+            System.out.println(libro.toString());
+        }
     }
 
-    public void setLibri(List<Libro> libri) {
-        this.libri = libri;
-    }
-
-    public void addLibro(Libro libro) {
-        this.libri.add(libro);
-    }
 }
