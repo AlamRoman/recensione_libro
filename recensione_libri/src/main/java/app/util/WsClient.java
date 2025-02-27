@@ -10,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Map;
 
 import app.errors.WsException;
 import app.model.xml.ListaLibri;
@@ -44,7 +45,7 @@ public class WsClient {
 		}
 		
 		
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(richiesta)).header("Accept", tipoDato).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(richiesta)).header("Content-Type", tipoDato).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 		
 		if (res.statusCode() != 200)
@@ -72,7 +73,7 @@ public class WsClient {
 			richiesta = "{\"id_recensione\":"+idRecensione+",\"voto\":"+elementoVoto+",\"commento\":\""+commento+"\"}";
 		}
 		
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).PUT(HttpRequest.BodyPublishers.ofString(richiesta)).header("Accept", tipoDato).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).PUT(HttpRequest.BodyPublishers.ofString(richiesta)).header("Content-Type", tipoDato).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 		
 		if (res.statusCode() != 200)
@@ -86,7 +87,7 @@ public class WsClient {
 	public String deleteRecensione(String tipoDato, String authToken, int idRecensione) throws Exception {
 		URI uri = new URI(this.baseUrl + "/delete_recensione?id_recensione="+idRecensione+"");
 		
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).DELETE().header("Accept", tipoDato).header("Auth-Token", authToken).build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).DELETE().header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 		
 		if (res.statusCode() != 200)
@@ -99,7 +100,7 @@ public class WsClient {
 	
 	public Recensioni getRecensioni(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
 		URI uri = new URI(this.baseUrl + "/list_user_reviews");
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).header("Accept", tipoDato).header("Auth-Token", authToken).GET().build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).header("Content-Type", tipoDato).header("Auth-Token", authToken).GET().build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 
 		if (res.statusCode() != 200)
@@ -115,7 +116,7 @@ public class WsClient {
 	
 	public ListaLibri getListaLibri(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
 		URI uri = new URI(this.baseUrl + "/list_books");
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).header("Accept", tipoDato).header("Auth-Token", authToken).GET().build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).header("Content-Type", tipoDato).header("Auth-Token", authToken).GET().build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 
 		if (res.statusCode() != 200)
@@ -131,4 +132,29 @@ public class WsClient {
 	    }
 	}
 	
+	
+	public boolean validateToken(String token, String contentType) throws Exception {
+	    URI uri = new URI(baseUrl + "/validate_token?token=" + token);
+	    HttpRequest request = HttpRequest.newBuilder()
+	            .uri(uri)
+	            .header("Content-Type", contentType)
+	            .GET()
+	            .build();
+
+	    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+	    String responseBody = response.body();
+
+	    if (response.statusCode() != 200) {
+	        System.out.println("API Error: " + responseBody);
+	        return false;
+	    }
+
+	    if ("application/json".equals(contentType)) {
+	        Gson gson = new Gson();
+	        Map<String, String> responseData = gson.fromJson(responseBody, Map.class);
+	        return "success".equals(responseData.get("status"));
+	    } else {
+	        return responseBody.contains("<status>success</status>");
+	    }
+	}
 }

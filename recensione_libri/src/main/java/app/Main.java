@@ -4,13 +4,14 @@ import java.util.Scanner;
 
 import app.util.WsClient;
 
-public class Main 
-{
+public class Main {
+	
+	private static String content_type = "application/xml";
+	private static WsClient ws = new WsClient("http://localhost/web_service/recensione_libro.php"); //Cambia link in base a dove stai avviando il web service
+	
 	public static void main( String[] args ){
-		WsClient c = new WsClient("http://localhost/web_service/recensione_libro.php"); //Cambia link in base a dove stai avviando il web service
 		
 		Scanner input = new Scanner(System.in);
-		String tipoDato = "application/xml";
 		String commento = "5tt";
 		float voto = 3;
 		int idLibro = 7;
@@ -21,7 +22,7 @@ public class Main
 		
 		//selezione tipo di dati
 		System.out.println("*** Recensione Libri ***");
-		System.out.println("\nSeleziona tipo di dati:");
+		System.out.println("\nSeleziona il Content Type:");
 		System.out.println("\t 1. XML (default)");
 		System.out.println("\t 2. JSON");
 		System.out.println("\t 3. Esci");
@@ -30,7 +31,7 @@ public class Main
 		scelta = input.nextInt();
 		
 		if (scelta == 2) {
-			tipoDato = "application/json";
+			content_type = "application/json";
 		}else if(scelta == 3) {
 			return;
 		}
@@ -54,13 +55,22 @@ public class Main
 				
 			case 2:
 				
+				boolean ris = login(input);
+				
+				if (ris) {//token valido
+					
+					exit = true;
+					
+				}else {//token non valido
+					
+					System.out.println("\nError: token non valido\n");
+				}
+				
 				break;
 				
 			case 3:
 				
-				exit = true;
-				
-				break;
+				return;
 
 			default:
 				
@@ -121,42 +131,19 @@ public class Main
 			
 		} while (!exit);
 		
-		/*do {  Menu delle opzioni provvisorio
-			System.out.println("Scegli l'operazione da effettuare:\n1) Login\n2) Visualizza la lista di libri\n9) Esci\n-> ");
-			switch (input.nextInt()) {
-			case 1:
-				// TODO
-				break;
-			case 2:
-				try {
-					System.out.println(c.getListaLibri(tipoDato, authToken));
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				break;
-			case 9:
-				uscita = true;
-				break;
-			default:
-				System.out.println("Operazione non disponibile, ritenta...");
-				break;
-			}
-			
-		} while (!uscita);*/
 		
 		try {
-			//System.out.println(c.pubblicaRecensione(tipoDato, authToken, idLibro, voto, commento));
-			//System.out.println(c.updateRecensione(tipoDato, authToken, 1, 3f, ""));
-			//System.out.println(c.getListaLibri(tipoDato, authToken));
-			//System.out.println(c.getRecensioni(tipoDato, authToken));
-			//System.out.println(c.deleteRecensione(tipoDato, authToken, 1));
+			//System.out.println(ws.pubblicaRecensione(content_type, authToken, idLibro, voto, commento));
+			//System.out.println(ws.updateRecensione(content_type, authToken, 1, 3f, ""));
+			//System.out.println(ws.getListaLibri(content_type, authToken));
+			//System.out.println(ws.getRecensioni(content_type, authToken));
+			//System.out.println(ws.deleteRecensione(content_type, authToken, 1));
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 	}
 	
-	private void registra(Scanner scanner) {
+	private static void registra(Scanner scanner) {
 
 		System.out.println("\nRegistra:\n");
 		
@@ -174,15 +161,26 @@ public class Main
 		//ws client request
 	}
 	
-	private boolean login(Scanner scanner) {
+	private static boolean login(Scanner scanner) {
 		
 		System.out.println("\nFai login usando il tuo token:\n");
 		
 		String token;
 		
 		System.out.print("Inserisci il tuo token : ");
-		token = scanner.next();
+		scanner.nextLine();
+		token = scanner.nextLine().trim();
 		
-		//ws client request
+		try {
+			
+			boolean ris = ws.validateToken(token, content_type);
+			
+			return ris;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 }
