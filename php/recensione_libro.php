@@ -157,6 +157,13 @@
 
                 $username = (string)$xml->username;
                 $password = (string)$xml->password;
+
+                if(empty($username) || empty($password)){
+                    http_response_code(400); // bad request
+                    header("Content-Type: application/xml");
+                    echo "<response><status>error</status><message>I parametri della richiesta sono vuoti</message></response>";
+                    exit;
+                }
                 
             }else if($CONTENT_TYPE === "application/json"){ //json data
                 // TODO
@@ -236,6 +243,14 @@
                     $id_libro = (int) $xml->id_libro;
                     $voto = (string) $xml->voto;
                     $commento = (string) $xml->commento;
+
+                    if (empty($id_libro) || empty($voto) || empty($commento)) {
+
+                        http_response_code(400); // bad request
+                        header("Content-Type: application/xml");
+                        echo "<response><status>error</status><message>I parametri della richiesta sono vuoti</message></response>";
+                        exit;
+                    }
                 
                 }else if($CONTENT_TYPE === "application/json"){ //json data
                     // TODO
@@ -298,7 +313,155 @@
         }
 
     }else if ($METHOD == "PUT") { //update
-        # code...
+
+        if($OPERATION == "update_review"){
+
+            if ($token !== null && validate_token($token)){
+
+                $input = file_get_contents("php://input");
+
+                $id_recensione = "";
+                $id_user = "";
+                $voto = "";
+                $commento = "";
+
+                //prendi l'id del user con il suo token
+                $id_user = get_user_id_by_token($token);
+
+                $data_ultima_modifica = date('Y-m-d H:i:s');
+
+                if ($CONTENT_TYPE === "application/xml") {// xml data
+
+                    libxml_use_internal_errors(true);
+                    $xml = simplexml_load_string($input);
+
+                    if (!$xml) {
+                        http_response_code(400); // bad request
+                        header("Content-Type: application/xml");
+                        echo "<response><status>error</status><message>Invalid XML format</message></response>";
+                        exit;
+                    }
+
+                    $id_recensione = (int) $xml->id_recensione;
+                    $voto = (string) $xml->voto;
+                    $commento = (string) $xml->commento;
+
+                    if (empty($id_recensione)) {
+                        http_response_code(400); // bad request
+                        header("Content-Type: application/xml");
+                        echo "<response><status>error</status><message>I parametri della richiesta sono vuoti</message></response>";
+                        exit;
+                    }
+                    
+                }else if($CONTENT_TYPE === "application/json"){ //json data
+                    // TODO
+                }
+
+                $sql = "SELECT * FROM recensione WHERE id = ? AND id_user = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("ii", $id_recensione, $id_user);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows > 0) {
+
+                    $msg = "";
+                    $no_error = true;
+
+                    if (!empty($voto)) { //update voto
+
+                        $sql = "UPDATE recensione SET voto = ?, data_ultima_modifica = ? WHERE id = ?";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param("ssi", $voto, $data_ultima_modifica, $id_recensione);
+
+                        if ($stmt->execute()) {
+                            $msg = "voto modificato con successo";
+                        }else{
+                            $msg = "voto non modificato";
+                            $no_error = false;
+                        }
+                    }
+
+                    if (!empty($commento)) { //update commento
+
+                        if(!empty($voto)){
+                            $msg .= ", ";
+                        }
+                        
+                        $sql = "UPDATE recensione SET commento = ?, data_ultima_modifica = ? WHERE id = ?";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param("ssi", $commento, $data_ultima_modifica, $id_recensione);
+
+                        if ($stmt->execute()) {
+                            $msg .= "commento modificato con successo";
+                        }else{
+                            $msg .= "commento non modificato";
+                            $no_error = false;
+                        }
+                    }
+
+                    if ($no_error) {
+
+                        $responseData = [
+                            "status"  => "error",
+                            "message" => "Modifica recensione: $msg"
+                        ];
+                        $status_code = 200; // OK
+                        
+                    }else{
+                        $responseData = [
+                            "status"  => "error",
+                            "message" => "Modifica recensione: $msg"
+                        ];
+                        $status_code = 500; // internal server error
+                    }
+                    
+                }else{// recensione inesistente o utente non autorizzato
+
+                    $sql = "SELECT * FROM recensione WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $id_recensione);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+
+                    if ($result->num_rows > 0) {
+
+                        $responseData = [
+                            "status"  => "error",
+                            "message" => "La recensione non è stata fatta da te"
+                        ];
+                        $status_code = 401; // unauthorized
+                        
+                    }else{
+
+                        $responseData = [
+                            "status"  => "error",
+                            "message" => "Recensione inesistente"
+                        ];
+                        $status_code = 400; // bad request
+
+                    }
+
+                }
+
+            } else{//token non valido
+
+                $responseData = [
+                    "status"  => "error",
+                    "message" => "Unauthorized"
+                ];
+                $status_code = 401; // unauthorized
+            }
+
+        } else {// operation not found
+            $status_code = 404;
+
+            $responseData = [
+                "status"  => "error",
+                "message" => "Operation not found"
+            ];
+        }
+        
     }else if ($METHOD == "DELETE") { //delete
 
         if($OPERATION == "delete_review"){
@@ -322,6 +485,14 @@
                     }
 
                     $id_recensione = (int) $xml->id_recensione;
+
+                    if (empty($id_recensione)) {
+
+                        http_response_code(400); // bad request
+                        header("Content-Type: application/xml");
+                        echo "<response><status>error</status><message>I parametri della richiesta sono vuoti</message></response>";
+                        exit;
+                    }
 
                 } else if($CONTENT_TYPE === "application/json"){ //json data
                     // TODO
