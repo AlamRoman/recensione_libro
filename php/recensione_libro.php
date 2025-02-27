@@ -205,7 +205,8 @@
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("ssss",  $username, $nome, $cognome, $token);
                 
-                if ($stmt->execute()) {
+                try {
+                    $stmt->execute();
 
                     $responseData = [
                         "status"  => "success",
@@ -216,14 +217,14 @@
                         "token"   => $token
                     ];
                     $status_code = 200; //OK
-                    
-                }else{
+                } catch (mysqli_sql_exception $e) {
                     $responseData = [
                         "status"  => "error",
                         "message" => "Errore durante la registrazione dell'utente"
                     ];
                     $status_code = 500; // internal server error
                 }
+                    
 
             }else{ // username non disponibile
 
@@ -310,18 +311,17 @@
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param("iisss", $id_user,$id_libro, $voto, $commento, $data_ultima_modifica);
                     
-                    if ($stmt->execute()) {
-                        
+                    try {
+                        $stmt->execute();
+
                         $result = $stmt->get_result();
 
-                        $responseData = [
-                            "status"  => "success",
-                            "message" => "Recensione inserito con successo"
-                        ];
-                        $status_code = 200; //OK
-
-                    }else{
-
+                            $responseData = [
+                                "status"  => "success",
+                                "message" => "Recensione inserito con successo"
+                            ];
+                            $status_code = 200; //OK
+                    } catch (mysqli_sql_exception $e) {
                         $responseData = [
                             "status"  => "error",
                             "message" => "Errore nell'inserimento nel database"
@@ -543,16 +543,15 @@
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param("i", $id_recensione);
 
-                    if ($stmt->execute()) {
+                    try {
+                        $stmt->execute();
 
                         $responseData = [
                             "status"  => "success",
                             "message" => "Recensione eliminata con successo"
                         ];
                         $status_code = 200; //OK
-                        
-                    }else{
-
+                    } catch (mysqli_sql_exception $e) {
                         $responseData = [
                             "status"  => "error",
                             "message" => "Errore durante l'eliminazione della recensione"
@@ -599,11 +598,34 @@
 
     if ($CONTENT_TYPE === "application/xml") {
 
-        header("Content-Type: application/xml"); //set content type
-        $xmlResponse = new SimpleXMLElement('<response/>'); //create response xml
-        array_to_xml($responseData, $xmlResponse); //convert data to xml
+        if ($OPERATION == "list_books" && $status_code == 200) { //check type of operation
+            $xmlResponse = new SimpleXMLElement('<Libri/>'); //create libri xml and adapts child element to be tipe libro
 
-        echo $xmlResponse->asXML(); //print the response
+            foreach ($responseData as $libro) {
+                $libroNode = $xmlResponse->addChild('Libro'); 
+                foreach ($libro as $key => $value) {
+                    $libroNode->addChild($key, htmlspecialchars($value));
+                }
+            }
+            echo $xmlResponse->asXML(); //print the response
+        }else if ($OPERATION == "list_user_reviews" && $status_code == 200) { //check type of operation
+            $xmlResponse = new SimpleXMLElement('<Recensioni/>'); //create recensioni xml and adapts child element to be tipe recensione
+
+            foreach ($responseData as $recensione) {
+                $recensioneNode = $xmlResponse->addChild('Recensione'); 
+                foreach ($recensione as $key => $value) {
+                    $recensioneNode->addChild($key, htmlspecialchars($value));
+                }
+            }
+            echo $xmlResponse->asXML(); //print the response
+        }else{
+            header("Content-Type: application/xml"); //set content type
+            $xmlResponse = new SimpleXMLElement('<response/>'); //create response xml
+            array_to_xml($responseData, $xmlResponse); //convert data to xml
+
+            echo $xmlResponse->asXML(); //print the response
+        }
+        
 
     } else {
 
