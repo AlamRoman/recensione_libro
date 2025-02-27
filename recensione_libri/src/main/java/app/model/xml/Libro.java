@@ -7,6 +7,8 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+// Classe inutilizzata
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Libro", propOrder = {
     "id",
