@@ -106,8 +106,9 @@
                 $id_user = get_user_id_by_token($token);
                 
                 //get all reviews of an user
-                $sql = "SELECT r.* FROM recensione r JOIN users u ON r.id_user = u.id";
+                $sql = "SELECT r.* FROM recensione r JOIN users u ON r.id_user = u.id WHERE u.id = ?";
                 $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $id_user);
                 $stmt->execute();
                 $result = $stmt->get_result();
 
@@ -117,6 +118,61 @@
                 }
 
                 $status_code = 200; //OK
+
+            } else{
+                $responseData = [
+                    "status"  => "error",
+                    "message" => "Unauthorized"
+                ];
+                $status_code = 401; // unauthorized
+            }
+
+        } else if ($OPERATION == "list_reviews_by_book"){
+
+            if ($token !== null && validate_token($token)){
+
+                if (isset($_GET["id_libro"])) {
+
+                    $id_libro = $_GET["id_libro"];
+
+                    $sql = "SELECT * FROM libro WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $id_libro);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+
+                    if ($result->num_rows > 0) {
+
+                        //get all reviews of a book
+                        $sql = "SELECT r.* FROM recensione r JOIN libro l ON r.id_libro = l.id WHERE l.id = ?";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param("i", $id_libro);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+
+                        //put all the reviews in the response
+                        while($book = $result->fetch_assoc()){
+                            $responseData[] = $book;
+                        }
+
+                        $status_code = 200; //OK
+                        
+                    }else{
+                        $responseData = [
+                            "status"  => "error",
+                            "message" => "Libro non trovato"
+                        ];
+                        $status_code = 400;
+                    }
+                    
+                }else{
+                    $status_code = 400; // bad request
+
+                    $responseData = [
+                        "status"  => "error",
+                        "message" => "Token non presente nella richiesta"
+                    ];
+                }
 
             } else{
                 $responseData = [
@@ -601,7 +657,7 @@
                         "status"  => "error",
                         "message" => "Recensione inesistente"
                     ];
-                    $status_code = 400; // internal server error
+                    $status_code = 400;
                 }
 
             } else{
