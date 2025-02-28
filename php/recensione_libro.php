@@ -71,8 +71,24 @@
     $responseData = [];
     $status_code = 405;
 
+    /**
+     * Methods of the web service that handles the requested operations
+     * 
+     * @param string $METHOD Request method (GET, POST, PUT, DELETE)
+     * @param string $OPERATION Operation to perform
+     */
+
     if ($METHOD == "GET") { //read
         
+        /**
+         * Operation: list_books
+         * 
+         * Returns all books in the database.
+         * 
+         * @return array List of books
+         * @response 200 OK
+         * @response 401 Unauthorized
+         */
         if ($OPERATION == "list_books") {// list all books
             
             if ($token !== null && validate_token($token)) {
@@ -98,6 +114,15 @@
                 $status_code = 401; // unauthorized
             }
 
+        /**
+         * Operation: list_user_reviews
+         * 
+         * Returns all reviews from a specified user via token.
+         * 
+         * @return array List of user reviews
+         * @response 200 OK
+         * @response 401 Unauthorized
+         */
         } else if ($OPERATION == "list_user_reviews"){
 
             if ($token !== null && validate_token($token)){
@@ -126,7 +151,18 @@
                 ];
                 $status_code = 401; // unauthorized
             }
-
+        /**
+         * Operation: list_reviews_by_book
+         * 
+         * Returns all reviews associated with a book identified by ID.
+         * 
+         * @param int $id_libro ID of the book to return reviews for
+         * @return array List of book reviews
+         * @response 200 OK
+         * @response 400 Bad Request
+         * @response 401 Unauthorized
+         * @response 404 Not Found
+         */
         } else if ($OPERATION == "list_reviews_by_book"){
 
             if ($token !== null && validate_token($token)){
@@ -181,7 +217,16 @@
                 ];
                 $status_code = 401; // unauthorized
             }
-
+        
+            /**
+             * Operation: validate_token
+             * 
+             * Checks whether a provided token is valid.
+             * 
+             * @param string $token Token to validate
+             * @response 200 OK
+             * @response 400 Bad Request
+             */
         } else if ($OPERATION == "validate_token"){
 
             if (isset($_GET["token"])) {
@@ -228,6 +273,21 @@
 
     }else if ($METHOD == "POST") { //create
 
+        /**
+         * Operation: register
+         * 
+         * Register a new user
+         * Parameters must be provided in XML or JSON format.
+         * 
+         * @param string $username Username to register
+         * @param string $nome Name of the user
+         * @param string $cognome Surname of the user
+         * @return array The user login token
+         * @response 200 OK
+         * @response 400 Bad Request
+         * @response 409 Conflict
+         * @response 500 Internal Server Error
+         */
         if ($OPERATION == "register") {
             
             $input = file_get_contents("php://input");
@@ -326,7 +386,20 @@
                 ];
                 $status_code = 409; // conflict
             }
-
+        
+        /**
+         * Operation: create_recensione
+         * 
+         * Create a new review for a book from a user.
+         * 
+         * @param int $id_libro ID of the book
+         * @param string $voto Rating given by the reviewer
+         * @param string $commento Comment of the review
+         * @response 200 OK
+         * @response 400 Bad Request
+         * @response 401 Unauthorized
+         * @response 409 Conflict
+         */
         } else if ($OPERATION == "create_recensione") {
 
             if ($token !== null && validate_token($token)) {
@@ -447,7 +520,19 @@
         }
 
     }else if ($METHOD == "PUT") { //update
-
+        /**
+         * Operation: update_recensione
+         * 
+         * Edit an existing review. The user can update the rating and/or comment of a review already present in the system.
+         * 
+         * @param int $id_recensione ID of the review to update
+         * @param string $voto Rating to update (optional)
+         * @param string $commento Comment to update (optional)
+         * @response 200 OK
+         * @response 400 Bad Request
+         * @response 401 Unauthorized
+         * @response 500 Internal Server Error
+         */
         if($OPERATION == "update_recensione"){
 
             if ($token !== null && validate_token($token)){
@@ -614,7 +699,18 @@
                 "message" => "Operation not found"
             ];
         }
-        
+    
+        /**
+         * Operation: delete_recensione
+         * 
+         * Delete a review from the system. Users can only delete their own reviews.
+         *
+         *  @param int $id_recensione ID of the review to delete
+         * @response 200 OK
+         * @response 400 Bad Request
+         * @response 401 Unauthorized
+         * @response 500 Internal Server Error
+         */
     }else if ($METHOD == "DELETE") { //delete
 
         if($OPERATION == "delete_recensione"){
