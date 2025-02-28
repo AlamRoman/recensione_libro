@@ -378,9 +378,9 @@
                         exit;
                     }
 
-                    $id_libro = $data["id_libro"];
-                    $voto = $data["voto"];
-                    $commento = $data["commento"];
+                    $id_libro = (int) $data["id_libro"];
+                    $voto = (float) $data["voto"];
+                    $commento = (string) $data["commento"];
 
                     if(empty($id_libro) || empty($voto) || empty($commento)){
                         
@@ -406,20 +406,20 @@
                     try {
                         $stmt->execute();
 
-                        $result = $stmt->get_result();
+                        $responseData = [
+                            "status"  => "success",
+                            "message" => "Recensione inserito con successo"
+                        ];
 
-                            $responseData = [
-                                "status"  => "success",
-                                "message" => "Recensione inserito con successo"
-                            ];
-                            $status_code = 200; //OK
-                    } catch (mysqli_sql_exception $e) {
+                        $status_code = 200; //OK
+                    }catch (mysqli_sql_exception $e) {
                         $responseData = [
                             "status"  => "error",
                             "message" => "Errore nell'inserimento nel database"
                         ];
-                        $status_code = 500; // internal server error
+                        $status_code = 500; // Internal Server Error
                     }
+                                       
                     
                 }else{
                     $responseData = [
@@ -556,7 +556,7 @@
                     if ($no_error) {
 
                         $responseData = [
-                            "status"  => "error",
+                            "status"  => "success",
                             "message" => "Modifica recensione: $msg"
                         ];
                         $status_code = 200; // OK
@@ -692,7 +692,7 @@
     if ($CONTENT_TYPE === "application/xml") {
 
         if ($OPERATION == "list_books" && $status_code == 200) { //check type of operation
-            $xmlResponse = new SimpleXMLElement('<Libri/>'); //create libri xml and adapts child element to be tipe libro
+            $xmlResponse = new SimpleXMLElement('<Libri/>'); //create libri xml and adapts child element to be type libro
 
             foreach ($responseData as $libro) {
                 $libroNode = $xmlResponse->addChild('Libro'); 
@@ -702,7 +702,7 @@
             }
             echo $xmlResponse->asXML(); //print the response
         }else if ($OPERATION == "list_user_reviews" && $status_code == 200) { //check type of operation
-            $xmlResponse = new SimpleXMLElement('<Recensioni/>'); //create recensioni xml and adapts child element to be tipe recensione
+            $xmlResponse = new SimpleXMLElement('<Recensioni/>'); //create recensioni xml and adapts child element to be type recensione
 
             foreach ($responseData as $recensione) {
                 $recensioneNode = $xmlResponse->addChild('Recensione'); 
