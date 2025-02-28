@@ -55,9 +55,6 @@
 					</execution>
 				</executions>
 				<configuration>
-					<sources>
-						<source>src/main/xsd/voti.xsd</source>
-					</sources>
 					<packageName>app.model.xml</packageName>
 					<outputDirectory>${basedir}/src/main/java</outputDirectory>
 					<clearOutputDir>false</clearOutputDir>

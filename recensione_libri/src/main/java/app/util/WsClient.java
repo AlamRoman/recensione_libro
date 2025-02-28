@@ -19,6 +19,7 @@ import app.model.xml.Libro;
 import app.model.xml.ListaLibri;
 import app.model.xml.Recensione;
 import app.model.xml.Recensioni;
+import app.model.xml.Response;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -50,15 +51,16 @@ public class WsClient {
 		}
 		
 		
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(richiesta)).header("Content-Type", tipoDato).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(richiesta)).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 		
 		if (res.statusCode() != 200)
 			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
 
-		String body = (String) res.body();
-
-		return body;
+		//String body = (String) res.body();
+		
+		
+		return "Recensione creata con successo";
 	}
 	
 	public String updateRecensione(String tipoDato, String authToken, int idRecensione, Float voto, String commento) throws Exception { //Funzione che invia una richiesta in PUT per modificare una recensione
@@ -98,9 +100,9 @@ public class WsClient {
 		if (res.statusCode() != 200)
 			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
 
-		String body = (String) res.body();
+		//String body = (String) res.body();
 
-		return body;
+		return "Recensione cancellata con successo";
 	}
 	
 	public Recensioni getMieRecensioni(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri

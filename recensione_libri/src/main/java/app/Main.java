@@ -15,10 +15,6 @@ public class Main {
 	
 	public static void main( String[] args ){
 		
-		String commento = "5tt";
-		float voto = 3;
-		int idLibro = 7;
-		
 		boolean exit=false;
 		int scelta;
 		
@@ -124,6 +120,8 @@ public class Main {
 			
 			case 4:
 				
+				inserisciRecensione();
+				
 				break;
 				
 			case 5:
@@ -131,6 +129,8 @@ public class Main {
 				break;
 				
 			case 6:
+				
+				cancellaUnaRecensione();
 				
 				break;
 				
@@ -207,6 +207,8 @@ public class Main {
 		
 		try {
 			
+			System.out.println("\n-> Lista tutti libri:");
+			
 			ListaLibri lista = ws.getListaLibri(content_type, authToken);
 			
 			System.out.println("\n" + lista.stampaLibri());
@@ -219,6 +221,8 @@ public class Main {
 	private static void mostraMieRecensioni() {
 		
 		try {
+			
+			System.out.println("\n-> Le mie recensioni: ");
 			
 			Recensioni lista = ws.getMieRecensioni(content_type, authToken);
 			
@@ -246,6 +250,61 @@ public class Main {
 			Recensioni recensioni = ws.getRecensioniPerLibro(id, content_type, authToken);
 			
 			System.out.println("\n" + recensioni.stampaRecensioni());
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	private static void inserisciRecensione() {
+		
+		try {
+			
+			System.out.println("\nLista libri:");
+			
+			ListaLibri lista = ws.getListaLibri(content_type, authToken);
+			
+			System.out.println(lista.stampaLibri());
+			
+			int id_libro;
+			float voto;
+			String commento;
+			
+			System.out.print("\nInserisci id del libro che vuoi recensionare: ");
+			id_libro = scanner.nextInt();
+			
+			System.out.print("inserisci il voto: ");
+			voto = scanner.nextFloat();
+			
+			System.out.print("inserisci un commento: ");
+			scanner.nextLine();
+			commento = scanner.nextLine();
+			
+			String ris = ws.pubblicaRecensione(content_type, authToken, id_libro, voto, commento);
+			
+			System.out.println(ris + "\n");
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	private static void cancellaUnaRecensione() {
+		try {
+			
+			System.out.println("\nLe tue recensioni:");
+			
+			Recensioni lista = ws.getMieRecensioni(content_type, authToken);
+			
+			System.out.println("\n" + lista.stampaRecensioni());
+			
+			System.out.print("Inserisci l'id della recensione che vuoi cancellare: ");
+			
+			int id_recensione = scanner.nextInt();
+			
+			String ris = ws.deleteRecensione(content_type, authToken, id_recensione);
+			
+			System.out.println(ris +  "\n");
 			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
