@@ -151,6 +151,7 @@
                 ];
                 $status_code = 401; // unauthorized
             }
+
         /**
          * Operation: list_reviews_by_book
          * 
@@ -218,15 +219,15 @@
                 $status_code = 401; // unauthorized
             }
         
-            /**
-             * Operation: validate_token
-             * 
-             * Checks whether a provided token is valid.
-             * 
-             * @param string $token Token to validate
-             * @response 200 OK
-             * @response 400 Bad Request
-             */
+        /**
+         * Operation: validate_token
+         * 
+         * Checks whether a provided token is valid.
+         * 
+         * @param string $token Token to validate
+         * @response 200 OK
+         * @response 400 Bad Request
+         */
         } else if ($OPERATION == "validate_token"){
 
             if (isset($_GET["token"])) {
@@ -520,6 +521,7 @@
         }
 
     }else if ($METHOD == "PUT") { //update
+
         /**
          * Operation: update_recensione
          * 
@@ -700,6 +702,8 @@
             ];
         }
     
+    }else if ($METHOD == "DELETE") { //delete
+
         /**
          * Operation: delete_recensione
          * 
@@ -711,8 +715,6 @@
          * @response 401 Unauthorized
          * @response 500 Internal Server Error
          */
-    }else if ($METHOD == "DELETE") { //delete
-
         if($OPERATION == "delete_recensione"){
 
             if ($token !== null && validate_token($token)){

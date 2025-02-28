@@ -75,20 +75,21 @@ public class WsClient {
 					+ elementoVoto
 					+ "<commento>"+commento+"</commento>"
 					+ "</recensione>";
+			
 		}else if (tipoDato == "application/json") {
 			String elementoVoto = (voto == null) ? "null" : voto.toString();
 			richiesta = "{\"id_recensione\":"+idRecensione+",\"voto\":"+elementoVoto+",\"commento\":\""+commento+"\"}";
 		}
 		
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).PUT(HttpRequest.BodyPublishers.ofString(richiesta)).header("Content-Type", tipoDato).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).PUT(HttpRequest.BodyPublishers.ofString(richiesta)).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
 		
 		if (res.statusCode() != 200)
 			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
 
-		String body = (String) res.body();
+		//String body = (String) res.body();
 
-		return body;
+		return "Recensione modificata con successo";
 	}
 	
 	public String deleteRecensione(String tipoDato, String authToken, int idRecensione) throws Exception {

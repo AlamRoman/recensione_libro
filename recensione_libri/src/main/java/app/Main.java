@@ -10,7 +10,7 @@ public class Main {
 	
 	private static String content_type = "application/json";
 	private static WsClient ws = new WsClient("http://localhost/web_service/recensione_libro.php"); //Cambia link in base a dove stai avviando il web service
-	private static String authToken ="7123a062ef08af773b5cff8ed91081d1dcc1d75c23cf99fbf72cacc8bb0aef12"; //Test Token
+	private static String authToken = "7123a062ef08af773b5cff8ed91081d1dcc1d75c23cf99fbf72cacc8bb0aef12"; //Test Token
 	private static Scanner scanner = new Scanner(System.in);
 	
 	public static void main( String[] args ){
@@ -126,6 +126,8 @@ public class Main {
 				
 			case 5:
 				
+				modificaRecensione();
+				
 				break;
 				
 			case 6:
@@ -150,16 +152,7 @@ public class Main {
 		
 		System.out.println("\n\nProgramma terminato");
 		
-		
-		try {
-			//System.out.println(ws.pubblicaRecensione(content_type, authToken, idLibro, voto, commento));
-			//System.out.println(ws.updateRecensione(content_type, authToken, 1, 3f, ""));
-			//System.out.println(ws.getListaLibri(content_type, authToken));
-			//System.out.println(ws.getRecensioni(content_type, authToken));
-			//System.out.println(ws.deleteRecensione(content_type, authToken, 1));
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+
 	}
 	
 	private static void registra(Scanner scanner) {
@@ -305,6 +298,42 @@ public class Main {
 			String ris = ws.deleteRecensione(content_type, authToken, id_recensione);
 			
 			System.out.println(ris +  "\n");
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	private static void modificaRecensione() {
+		
+		try {
+			
+			System.out.println("\nLe tue recensioni:");
+			
+			Recensioni lista = ws.getMieRecensioni(content_type, authToken);
+			
+			System.out.println("\n" + lista.stampaRecensioni());
+			
+			int id_recensione;
+			float voto;
+			String commento;
+			
+			System.out.print("Inserisci l'id della recensione che vuoi modificare: ");
+			
+			id_recensione = scanner.nextInt();
+			
+			System.out.print("Inserisci il nuovo voto: ");
+			
+			voto = scanner.nextFloat();
+			
+			System.out.println("Inserisci il nuovo commento: ");
+			
+			scanner.nextLine();
+			commento = scanner.nextLine();
+			
+			String ris = ws.updateRecensione(content_type, authToken, id_recensione,voto, commento);
+			
+			System.out.println(ris + "\n");
 			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
