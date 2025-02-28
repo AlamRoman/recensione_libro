@@ -19,11 +19,20 @@ public class ListaLibri {
     public ListaLibri() {
         this.libri = new ArrayList<>();
     }
+    
+    public ListaLibri(List<Libro> libri) {
+        this.libri = libri;
+    }
 
-    public void stampaLibri() {
+    public String stampaLibri() {
+    	
+    	String ris = "";
+    	
         for (Libro libro : libri) {
-            System.out.println(libro.toString());
+            ris += libro.toString() + "\n";
         }
+        
+        return ris;
     }
 
 }

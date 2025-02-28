@@ -78,4 +78,11 @@ public class Libro {
 	public void setAnno_pubblicazione(BigInteger anno_pubblicazione) {
 		this.anno_pubblicazione = anno_pubblicazione;
 	}
+	@Override
+	public String toString() {
+		return "Libro [id=" + id + ", titolo=" + titolo + ", autore=" + autore + ", descrizione=" + descrizione
+				+ ", isbn=" + isbn + ", genere=" + genere + ", anno_pubblicazione=" + anno_pubblicazione + "]";
+	}
+	
+	
 }

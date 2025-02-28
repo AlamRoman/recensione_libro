@@ -2,24 +2,27 @@ package app;
 
 import java.util.Scanner;
 
+import app.model.xml.ListaLibri;
+import app.model.xml.Recensioni;
 import app.util.WsClient;
 
 public class Main {
 	
-	private static String content_type = "application/xml";
+	private static String content_type = "application/json";
 	private static WsClient ws = new WsClient("http://localhost/web_service/recensione_libro.php"); //Cambia link in base a dove stai avviando il web service
+	private static String authToken ="7123a062ef08af773b5cff8ed91081d1dcc1d75c23cf99fbf72cacc8bb0aef12"; //Test Token
+	private static Scanner scanner = new Scanner(System.in);
 	
 	public static void main( String[] args ){
 		
-		Scanner input = new Scanner(System.in);
 		String commento = "5tt";
 		float voto = 3;
 		int idLibro = 7;
-		String authToken ="7123a062ef08af773b5cff8ed91081d1dcc1d75c23cf99fbf72cacc8bb0aef12"; //Test Token
 		
 		boolean exit=false;
 		int scelta;
 		
+		/*
 		//selezione tipo di dati
 		System.out.println("*** Recensione Libri ***");
 		System.out.println("\nSeleziona il Content Type:");
@@ -28,7 +31,7 @@ public class Main {
 		System.out.println("\t 3. Esci");
 		System.out.print("\nInserisci scelta: ");
 		
-		scelta = input.nextInt();
+		scelta = scanner.nextInt();
 		
 		if (scelta == 2) {
 			content_type = "application/json";
@@ -46,7 +49,7 @@ public class Main {
 			System.out.println("\t 3. Esci");
 			System.out.print("\nInserisci scelta: ");
 			
-			scelta = input.nextInt();
+			scelta = scanner.nextInt();
 			
 			switch (scelta) {
 			case 1:
@@ -82,6 +85,8 @@ public class Main {
 		
 		exit = false;
 		
+		*/
+		
 		//menu principale
 		do {
 			
@@ -89,24 +94,31 @@ public class Main {
 			System.out.println("\nMenu:");
 			System.out.println("\t 1. Mostra tutti i libri");
 			System.out.println("\t 2. Mostra le mie recensioni");
-			System.out.println("\t 3. Inserisci una recensione");
-			System.out.println("\t 4. Modifica una recensione");
-			System.out.println("\t 5. Cancella una recensione");
-			System.out.println("\t 6. Esci");
+			System.out.println("\t 3. Mostra tutte le recensioni di un libro");
+			System.out.println("\t 4. Inserisci una recensione");
+			System.out.println("\t 5. Modifica una recensione");
+			System.out.println("\t 6. Cancella una recensione");
+			System.out.println("\t 7. Esci");
 			System.out.print("\nInserisci scelta: ");
 			
-			scelta = input.nextInt();
+			scelta = scanner.nextInt();
 			
 			switch (scelta) {
 			case 1:
+				
+				mostraTuttiLibri();
 				
 				break;
 				
 			case 2:
 				
+				mostraMieRecensioni();
+				
 				break;
 				
 			case 3:
+				
+				mostraRecensioniPerLibro();
 				
 				break;
 			
@@ -120,7 +132,12 @@ public class Main {
 				
 			case 6:
 				
+				break;
+				
+			case 7:
+				
 				exit = true;
+				
 				break;
 
 			default:
@@ -130,6 +147,8 @@ public class Main {
 			}
 			
 		} while (!exit);
+		
+		System.out.println("\n\nProgramma terminato");
 		
 		
 		try {
@@ -178,9 +197,58 @@ public class Main {
 			return ris;
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 		
 		return false;
+	}
+	
+	private static void mostraTuttiLibri() {
+		
+		try {
+			
+			ListaLibri lista = ws.getListaLibri(content_type, authToken);
+			
+			System.out.println("\n" + lista.stampaLibri());
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	private static void mostraMieRecensioni() {
+		
+		try {
+			
+			Recensioni lista = ws.getMieRecensioni(content_type, authToken);
+			
+			System.out.println("\n" + lista.stampaRecensioni());
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	private static void mostraRecensioniPerLibro() {
+		
+		try {
+			
+			System.out.println("\nLista libri:");
+			
+			ListaLibri lista = ws.getListaLibri(content_type, authToken);
+			
+			System.out.println(lista.stampaLibri());
+			
+			System.out.print("\nInserisci id libro: ");
+			
+			int id = scanner.nextInt();
+			
+			Recensioni recensioni = ws.getRecensioniPerLibro(id, content_type, authToken);
+			
+			System.out.println("\n" + recensioni.stampaRecensioni());
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }

@@ -10,13 +10,18 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.List;
 import java.util.Map;
+import java.lang.reflect.Type;
 
 import app.errors.WsException;
+import app.model.xml.Libro;
 import app.model.xml.ListaLibri;
+import app.model.xml.Recensione;
 import app.model.xml.Recensioni;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class WsClient {
 	private String baseUrl;
@@ -98,7 +103,7 @@ public class WsClient {
 		return body;
 	}
 	
-	public Recensioni getRecensioni(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
+	public Recensioni getMieRecensioni(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
 		URI uri = new URI(this.baseUrl + "/list_user_reviews");
 		HttpRequest req = HttpRequest.newBuilder().uri(uri).header("Content-Type", tipoDato).header("Auth-Token", authToken).GET().build();
 		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
@@ -107,11 +112,33 @@ public class WsClient {
 			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
 
 		if (tipoDato.equals("application/json")) {
-	        Gson gson = new Gson();
-	        return gson.fromJson(res.body(), Recensioni.class);
-	    } else {
-	        return XmlUtils.unmarshal(Recensioni.class, res.body());
-	    }
+		    Gson gson = new Gson();
+		    Type listType = new TypeToken<List<Recensione>>() {}.getType();
+		    List<Recensione> lista = gson.fromJson(res.body(), listType);
+		    return new Recensioni(lista);
+		} else {
+		    return XmlUtils.unmarshal(Recensioni.class, res.body());
+		}
+
+	}
+	
+	public Recensioni getRecensioniPerLibro(int id_libro, String content_type, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
+		URI uri = new URI(this.baseUrl + "/list_reviews_by_book?id_libro="+id_libro);
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).header("Content-Type", content_type).header("Auth-Token", authToken).GET().build();
+		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
+
+		if (res.statusCode() != 200)
+			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
+
+		if (content_type.equals("application/json")) {
+		    Gson gson = new Gson();
+		    Type listType = new TypeToken<List<Recensione>>() {}.getType();
+		    List<Recensione> lista = gson.fromJson(res.body(), listType);
+		    return new Recensioni(lista);
+		} else {
+		    return XmlUtils.unmarshal(Recensioni.class, res.body());
+		}
+
 	}
 	
 	public ListaLibri getListaLibri(String tipoDato, String authToken) throws Exception { //Funzione che invia una richiesta in GET per visulizzare la lista dei libri
@@ -121,12 +148,14 @@ public class WsClient {
 
 		if (res.statusCode() != 200)
 			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
-
-		ListaLibri lista = XmlUtils.unmarshal(ListaLibri.class, res.body());
 		
 		if (tipoDato.equals("application/json")) {
 			Gson gson = new Gson();
-		    return gson.fromJson(res.body(), ListaLibri.class);
+			
+			Type listType = new TypeToken<List<Libro>>() {}.getType();
+			List<Libro> lista = gson.fromJson(res.body(), listType);
+			return new ListaLibri(lista);
+
 	    } else {
 	        return XmlUtils.unmarshal(ListaLibri.class, res.body());
 	    }

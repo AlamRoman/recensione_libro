@@ -19,11 +19,19 @@ public class Recensioni {
     public Recensioni() {
         this.recensioni = new ArrayList<>();
     }
+    
+    public Recensioni(List<Recensione> recensioni) {
+        this.recensioni = recensioni;
+    }
 
-    public void stampaRecensioni() {
+    public String stampaRecensioni() {
+    	String ris = "";
+    	
         for (Recensione recensione : recensioni) {
-            System.out.println(recensione.toString());
+        	ris += recensione.toString() + "\n";
         }
+        
+        return ris;
     }
 
 }
