@@ -19,6 +19,7 @@ import app.model.xml.Libro;
 import app.model.xml.ListaLibri;
 import app.model.xml.Recensione;
 import app.model.xml.Recensioni;
+import app.model.xml.RegistrationResponse;
 import app.model.xml.Response;
 
 import com.google.gson.Gson;
@@ -61,6 +62,45 @@ public class WsClient {
 		
 		
 		return "Recensione creata con successo";
+	}
+	
+	public String registerUser(String tipoDato,String authToken, String username, String nome, String cognome) throws Exception { //Funzione che invia una richiesta in POST per scrivere una recensione
+		URI uri = new URI(this.baseUrl + "/register");
+		
+		String richiesta = "";
+		
+		if (tipoDato.equals("application/xml")) {
+			richiesta = "<recensione>"
+					+ "<username>"+username+"</username>"
+					+ "<nome>"+nome+"</nome>"
+					+ "<cognome>"+cognome+"</cognome>"
+					+ "</recensione>";
+		}else if (tipoDato.equals("application/json")) {
+			richiesta = "{\"username\":\"" + username + "\","
+		              + "\"nome\":\"" + nome + "\","
+		              + "\"cognome\":\"" + cognome + "\"}";
+		}
+		
+		
+		HttpRequest req = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(richiesta)).header("Content-Type", tipoDato).header("Auth-Token", authToken).build();
+		HttpResponse<String> res = this.client.send(req, BodyHandlers.ofString());
+		
+		if (res.statusCode() != 200)
+			throw new WsException("HTTP status code: " + res.statusCode() + "\n"+ res.body());
+
+		String responseBody = res.body();
+		String token;
+
+		if (tipoDato.equals("application/json")) {
+		    Gson gson = new Gson();
+		    RegistrationResponse response = gson.fromJson(responseBody, RegistrationResponse.class);
+		    token = response.getToken();
+		} else {
+		    RegistrationResponse response = XmlUtils.unmarshal(RegistrationResponse.class, responseBody);
+		    token = response.getToken();
+		}
+		
+		return "Utente registrato, salva il tuo token : " + token;
 	}
 	
 	public String updateRecensione(String tipoDato, String authToken, int idRecensione, Float voto, String commento) throws Exception { //Funzione che invia una richiesta in PUT per modificare una recensione

@@ -18,7 +18,7 @@ public class Main {
 		boolean exit=false;
 		int scelta;
 		
-		/*
+		
 		//selezione tipo di dati
 		System.out.println("*** Recensione Libri ***");
 		System.out.println("\nSeleziona il Content Type:");
@@ -32,8 +32,12 @@ public class Main {
 		if (scelta == 2) {
 			content_type = "application/json";
 		}else if(scelta == 3) {
+			
+			System.out.println("\n\nProgramma terminato");
+			
 			return;
 		}
+		
 		
 		//login/registra
 		do {
@@ -50,11 +54,13 @@ public class Main {
 			switch (scelta) {
 			case 1:
 				
+				registra();
+				
 				break;
 				
 			case 2:
 				
-				boolean ris = login(input);
+				boolean ris = login();
 				
 				if (ris) {//token valido
 					
@@ -69,6 +75,8 @@ public class Main {
 				
 			case 3:
 				
+				System.out.println("\n\nProgramma terminato");
+				
 				return;
 
 			default:
@@ -80,8 +88,6 @@ public class Main {
 		} while (!exit);
 		
 		exit = false;
-		
-		*/
 		
 		//menu principale
 		do {
@@ -155,25 +161,33 @@ public class Main {
 
 	}
 	
-	private static void registra(Scanner scanner) {
-
-		System.out.println("\nRegistra:\n");
+	private static void registra() {
 		
-		String username, nome, cognome;
-		
-		System.out.print("Inserisci l'username : ");
-		username = scanner.next();
-		
-		System.out.print("Inserisci il nome : ");
-		nome = scanner.next();
-		
-		System.out.print("Inserisci il cognome : ");
-		cognome = scanner.next();
-		
-		//ws client request
+		try {
+			
+			System.out.println("\nRegistra:\n");
+			
+			String username, nome, cognome;
+			
+			System.out.print("Inserisci l'username : ");
+			username = scanner.next();
+			
+			System.out.print("Inserisci il nome : ");
+			nome = scanner.next();
+			
+			System.out.print("Inserisci il cognome : ");
+			cognome = scanner.next();
+			
+			String ris = ws.registerUser(content_type, authToken, username, nome, cognome);
+			
+			System.out.println("\n" + ris);
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	
-	private static boolean login(Scanner scanner) {
+	private static boolean login() {
 		
 		System.out.println("\nFai login usando il tuo token:\n");
 		

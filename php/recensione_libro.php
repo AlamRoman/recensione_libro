@@ -337,7 +337,7 @@
                 if(empty($username) || empty($nome) || empty($cognome)){
 
                     http_response_code(400); // bad request
-                    echo json_encode(["status" => "error", "message" => "Invalid JSON format"]);
+                    echo json_encode(["status" => "error", "message" => "Mancano parametri nella richiesta"]);
                     exit;
                 }
             }
