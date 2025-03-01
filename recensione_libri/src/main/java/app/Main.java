@@ -201,6 +201,10 @@ public class Main {
 			
 			boolean ris = ws.validateToken(token, content_type);
 			
+			if (ris) {
+				authToken = token;
+			}
+			
 			return ris;
 			
 		} catch (Exception e) {
