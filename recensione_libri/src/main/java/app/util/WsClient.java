@@ -20,7 +20,6 @@ import app.model.xml.ListaLibri;
 import app.model.xml.Recensione;
 import app.model.xml.Recensioni;
 import app.model.xml.RegistrationResponse;
-import app.model.xml.Response;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
