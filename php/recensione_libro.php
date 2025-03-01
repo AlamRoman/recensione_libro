@@ -1,5 +1,19 @@
 <?php 
 
+    /**
+     * Web Service per la gestione di recensioni assegnate a libri dagli utenti
+     * Il Web Service permette di:
+     * - Registrare e far accedere un utente tramite token;
+     * - Visualizzare l'elenco dei libri presenti;
+     * - Visualizzare l'elenco di recensioni per libro o per utente;
+     * - Inserire, modificare ed eliminare le recensioni dell'utente autentificato
+     * 
+     * Con possibilità di scegliere il content type delle richieste tra xml e json
+     * 
+     * In seguito sono presenti le documentazioni delle varie operazioni
+     * 
+     */
+
     $hostname = "localhost";
     $username = "root";
     $password = "";
